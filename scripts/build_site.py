@@ -104,7 +104,7 @@ def hub_loan():
 {ad()}
 {table(['대출 금액', '연 4% 월 상환액', '연 5% 월 상환액'], rows, (1, 2))}
 <p class="note">{LNOTE}</p>
-{chips([("이자 계산 (금액×금리)", "/interest/"), ("월 상환액으로 대출 한도", "/afford/"), ("DSR 대출 한도", "/dsr/"), ("예금 이자", "/deposit/"), ("적금 이자", "/savings/"), ("대출 이자 계산기", "/calculator/")])}
+{chips([("주택담보대출 금리 비교", "/product/mortgage/"), ("신용대출 금리 비교", "/product/credit/"), ("이자 계산 (금액×금리)", "/interest/"), ("월 상환액으로 대출 한도", "/afford/"), ("DSR 대출 한도", "/dsr/"), ("예금 이자", "/deposit/"), ("적금 이자", "/savings/"), ("대출 이자 계산기", "/calculator/")])}
 """
     faq = [("3억 대출 월 상환액은?", f"연 4% 30년 원리금균등 기준 월 {won(L.equal_payment(3 * EOK, 4.0, 30)['monthly'])}원입니다."), ("원금균등과 원리금균등의 차이는?", "원리금균등은 매월 같은 금액을 내고 원금균등은 매월 같은 원금에 줄어드는 이자를 더해 냅니다. 총이자는 원금균등이 적고 초기 부담은 큽니다.")]
     write("/loan/", layout("/loan/", "대출 이자 계산 — 금액·금리·기간별 월 상환액 (원리금균등)", "대출 금액·금리·기간별 월 상환액과 총이자 표. 3억 4% 30년 월 상환액, 원리금균등·원금균등·만기일시 비교.", body, faq, [("홈", "/"), ("대출 이자", "/loan/")], coupang=True), "0.9")
@@ -180,7 +180,7 @@ def hub_dep():
 {ad()}
 {table(['예치 금액', '연 3.5% 세후 이자', '연 4% 세후 이자'], rows, (1, 2))}
 <p class="note">{DNOTE}</p>
-{chips([("적금 이자", "/savings/"), ("목표 금액 모으기", "/goal/"), ("이자 계산", "/interest/"), ("대출 이자", "/loan/")])}
+{chips([("예금 금리 순위", "/rank/deposit/12/"), ("정기예금 금리 비교", "/product/deposit/"), ("적금 이자", "/savings/"), ("목표 금액 모으기", "/goal/"), ("이자 계산", "/interest/"), ("대출 이자", "/loan/")])}
 <script src="/assets/js/loan.js"></script>
 """
     faq = [("1천만 원 예금 1년 이자는?", f"연 3.5% 기준 세후 {won(L.deposit(1000 * MAN, 3.5)['net'])}원입니다."), ("이자소득세율은?", "일반 과세 15.4%(소득세 14% + 지방소득세 1.4%)입니다.")]
@@ -216,7 +216,7 @@ def hub_sav():
 <div class="tool-box"><div class="tool-row"><div><label for="s-p">월 납입액(원)</label><input id="s-p" type="number" value="500000" style="width:140px"></div><div><label for="s-r">연 금리(%)</label><input id="s-r" type="number" step="0.1" value="4" style="width:80px"></div><div><label for="s-m">기간(개월)</label><input id="s-m" type="number" value="12" style="width:70px"></div><button class="btn-p" id="s-go">계산</button></div><div class="tool-out" id="s-out">계산 결과가 여기에 표시됩니다.</div></div>
 {ad()}
 {table(['월 납입액', '연 4% 12개월 만기 수령액', '세후 이자'], rows, (1, 2))}
-{chips([("목표 금액 모으기", "/goal/"), ("예금 이자", "/deposit/"), ("이자 계산", "/interest/"), ("대출 이자", "/loan/")])}
+{chips([("적금 금리 순위", "/rank/saving/12/"), ("적금 금리 비교", "/product/saving/"), ("목표 금액 모으기", "/goal/"), ("예금 이자", "/deposit/"), ("이자 계산", "/interest/"), ("대출 이자", "/loan/")])}
 <script src="/assets/js/loan.js"></script>
 """
     faq = [("월 50만 원 적금 1년이면?", f"연 4% 기준 만기 수령액 약 {won(L.savings(50 * MAN, 4.0, 12)['total'])}원입니다."), ("적금도 이자소득세를 떼나요?", "일반 과세는 15.4%입니다. 비과세종합저축 등은 제외됩니다.")]
@@ -522,10 +522,12 @@ def page_home():
 <a class="card" href="/interest/"><b>💸 이자 계산</b><span>금액×금리 1년·한 달 이자</span></a>
 <a class="card" href="/afford/"><b>🧾 대출 한도</b><span>월 상환액으로 거꾸로 계산</span></a>
 <a class="card" href="/goal/"><b>🎯 목표 모으기</b><span>1억 모으려면 월 얼마?</span></a>
+<a class="card" href="/product/"><b>🏷️ 금융상품 금리</b><span>예금·적금·대출 공시 비교</span></a>
+<a class="card" href="/rank/"><b>🏆 금리 순위</b><span>예금·적금·대출 TOP</span></a>
 <a class="card" href="/calculator/"><b>🧮 계산기</b><span>직접 입력</span></a>
 </div>
 <h2 class="group-title">🔥 많이 찾는 계산</h2>
-{chips([("3억 4% 이자", "/interest/3억/4/"), ("1억 5% 이자", "/interest/1억/5/"), ("월 100만원 대출한도", "/afford/100/4/30년/"), ("1억 모으기 적금", "/goal/1억/4/60개월/"), ("3억 4% 30년", "/loan/3억/4/30년/"), ("2억 4.5% 20년", "/loan/2억/4.5/20년/"), ("5억 4% 30년", "/loan/5억/4/30년/"), ("1억 5% 10년", "/loan/1억/5/10년/"), ("연소득 5천 한도", "/dsr/5천/"), ("예금 1천만원", "/deposit/1천/"), ("적금 월 50만원", "/savings/50/")])}
+{chips([("예금 금리 순위", "/rank/deposit/12/"), ("주담대 금리 비교", "/product/mortgage/"), ("3억 4% 이자", "/interest/3억/4/"), ("1억 5% 이자", "/interest/1억/5/"), ("월 100만원 대출한도", "/afford/100/4/30년/"), ("1억 모으기 적금", "/goal/1억/4/60개월/"), ("3억 4% 30년", "/loan/3억/4/30년/"), ("2억 4.5% 20년", "/loan/2억/4.5/20년/"), ("5억 4% 30년", "/loan/5억/4/30년/"), ("1억 5% 10년", "/loan/1억/5/10년/"), ("연소득 5천 한도", "/dsr/5천/"), ("예금 1천만원", "/deposit/1천/"), ("적금 월 50만원", "/savings/50/")])}
 <p class="lead">우아대출은 대출 원리금 상환액과 총이자, DSR 대출 한도, 예금·적금 세후 이자를 금액별로 계산해 둔 사이트입니다. 모든 결과는 입력 조건으로 계산한 참고용 추정이며 대출·투자 권유가 아닙니다. 자세한 기준은 <a href="/about/">계산 기준</a>을 참고하세요. 연봉 실수령액과 세금은 <a href="https://wooayeonbong.wooahouse.com">우아연봉</a>·<a href="https://wooatax.wooahouse.com">우아세금</a>에서 확인하세요.</p>
 """
     faq = [("계산 결과를 믿어도 되나요?", "입력한 조건으로 계산한 참고용 추정입니다. 실제 금리와 한도는 금융기관 심사 결과에 따릅니다."), ("원리금균등이 무엇인가요?", "매월 같은 금액(원금+이자)을 내는 상환 방식입니다.")]
@@ -607,6 +609,8 @@ def main():
     for a in DEP_AMTS:
         for r in DEP_RATES:
             for m in DEP_MONTHS: page_dep_combo(a, r, m)
+    import build_products
+    build_products.main()
     page_calc(); page_home(); page_about(); page_privacy()
     today = time.strftime("%Y-%m-%d")
     urls = "".join("<url><loc>%s%s</loc><lastmod>%s</lastmod><priority>%s</priority></url>" % (BASE, q(p), today, pr) for p, pr in WRITTEN)
