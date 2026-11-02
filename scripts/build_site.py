@@ -104,7 +104,7 @@ def hub_loan():
 {ad()}
 {table(['대출 금액', '연 4% 월 상환액', '연 5% 월 상환액'], rows, (1, 2))}
 <p class="note">{LNOTE}</p>
-{chips([("DSR 대출 한도", "/dsr/"), ("예금 이자", "/deposit/"), ("적금 이자", "/savings/"), ("대출 이자 계산기", "/calculator/")])}
+{chips([("이자 계산 (금액×금리)", "/interest/"), ("월 상환액으로 대출 한도", "/afford/"), ("DSR 대출 한도", "/dsr/"), ("예금 이자", "/deposit/"), ("적금 이자", "/savings/"), ("대출 이자 계산기", "/calculator/")])}
 """
     faq = [("3억 대출 월 상환액은?", f"연 4% 30년 원리금균등 기준 월 {won(L.equal_payment(3 * EOK, 4.0, 30)['monthly'])}원입니다."), ("원금균등과 원리금균등의 차이는?", "원리금균등은 매월 같은 금액을 내고 원금균등은 매월 같은 원금에 줄어드는 이자를 더해 냅니다. 총이자는 원금균등이 적고 초기 부담은 큽니다.")]
     write("/loan/", layout("/loan/", "대출 이자 계산 — 금액·금리·기간별 월 상환액 (원리금균등)", "대출 금액·금리·기간별 월 상환액과 총이자 표. 3억 4% 30년 월 상환액, 원리금균등·원금균등·만기일시 비교.", body, faq, [("홈", "/"), ("대출 이자", "/loan/")], coupang=True), "0.9")
@@ -141,7 +141,7 @@ def hub_dsr():
 <p class="lead">DSR 40% 규제에서 연소득별로 대출받을 수 있는 금액입니다. 다른 대출이 없다고 가정하며 스트레스 금리 {STRESS}%p를 더한 한도와 만기 40년 한도를 함께 비교했습니다. 연소득을 눌러 금리·만기별 표를 확인하세요.</p>
 {ad()}
 {table(['연소득', '30년 한도', '스트레스 반영', '40년 한도'], rows, (1, 2, 3))}
-{chips([("대출 이자 계산", "/loan/"), ("대출 계산기", "/calculator/")])}
+{chips([("월 상환액으로 대출 한도", "/afford/"), ("대출 이자 계산", "/loan/"), ("이자 계산", "/interest/"), ("대출 계산기", "/calculator/")])}
 """
     faq = [("연소득 5천만 원이면 주택담보대출은 얼마까지?", f"DSR 40%, 연 4% 30년 기준 약 {amt2(L.dsr_max(5000 * MAN, 4.0, 30))}입니다(다른 대출 없음)."), ("스트레스 DSR이란?", "대출 금리에 가산금리를 더해 금리 상승기에도 상환 가능한지 보는 심사 방식으로 한도가 줄어듭니다.")]
     write("/dsr/", layout("/dsr/", "DSR 대출 한도 계산 — 연소득별 대출 가능 금액 (40%)", "연소득 2천만~2억 원별 DSR 40% 대출 한도. 연 4% 30년·스트레스 금리 반영·40년 만기 비교.", body, faq, [("홈", "/"), ("DSR 한도", "/dsr/")], coupang=True), "0.9")
@@ -155,7 +155,7 @@ DNOTE = "이자소득세 15.4%(소득세 14% + 지방소득세 1.4%)를 뗀 세�
 def page_dep(a):
     path = "/deposit/%s/" % aslug(a)
     d = L.deposit(a, 3.5, 12)
-    rows = [['연 %s%%' % rs(r)] + [won(L.deposit(a, r, m)["net"]) + "원" for m in DEP_MONTHS] for r in DEP_RATES]
+    rows = [['연 %s%%' % rs(r)] + ['<a href="%s">%s원</a>' % (dpath(a, r, m), won(L.deposit(a, r, m)["net"])) for m in DEP_MONTHS] for r in DEP_RATES]
     t = table(["금리"] + ["%d개월" % m for m in DEP_MONTHS], rows, (1, 2, 3, 4))
     nb = table(["예치 금액", "연 3.5% 1년 세후 이자", "연 4% 1년 세후 이자"], [['<a href="/deposit/%s/">%s</a>' % (aslug(x), amt(x)) if x != a else "<b>%s</b>" % amt(x), won(L.deposit(x, 3.5)["net"]) + "원", won(L.deposit(x, 4.0)["net"]) + "원"] for x in near(DEP_AMTS, a)], (1, 2))
     body = f"""
@@ -166,7 +166,7 @@ def page_dep(a):
 <h2 class="group-title">📈 다른 금액</h2>
 {nb}
 <p class="note">{DNOTE}</p>
-{chips([("예금 이자 전체", "/deposit/"), ("적금 이자", "/savings/"), ("예금 계산기", "/calculator/")])}
+{chips([("예금 이자 전체", "/deposit/"), ("적금 이자", "/savings/"), ("목표 금액 모으기", "/goal/"), ("예금 계산기", "/calculator/")])}
 """
     faq = [(f"{amt(a)} 예금 이자는 얼마인가요?", f"연 3.5% 1년 기준 세후 {won(d['net'])}원입니다(세전 {won(d['gross'])}원, 이자소득세 15.4%)."), ("예금 이자에 세금이 붙나요?", "일반 과세 시 이자소득세 14%와 지방소득세 1.4%를 합친 15.4%가 원천징수됩니다.")]
     write(path, layout(path, f"예금 이자 {amt(a)} — 연 3.5% 1년 세후 {won(d['net'])}원", f"{amt(a)} 정기예금 이자. 금리 2.5~5%·6~36개월별 세후 이자 표(이자소득세 15.4%). 연 3.5% 1년 세후 {won(d['net'])}원.", body, faq, [("홈", "/"), ("예금 이자", "/deposit/"), (amt(a), path)], coupang=a in (1000 * MAN, EOK)), "0.6")
@@ -180,7 +180,7 @@ def hub_dep():
 {ad()}
 {table(['예치 금액', '연 3.5% 세후 이자', '연 4% 세후 이자'], rows, (1, 2))}
 <p class="note">{DNOTE}</p>
-{chips([("적금 이자", "/savings/"), ("대출 이자", "/loan/")])}
+{chips([("적금 이자", "/savings/"), ("목표 금액 모으기", "/goal/"), ("이자 계산", "/interest/"), ("대출 이자", "/loan/")])}
 <script src="/assets/js/loan.js"></script>
 """
     faq = [("1천만 원 예금 1년 이자는?", f"연 3.5% 기준 세후 {won(L.deposit(1000 * MAN, 3.5)['net'])}원입니다."), ("이자소득세율은?", "일반 과세 15.4%(소득세 14% + 지방소득세 1.4%)입니다.")]
@@ -203,7 +203,7 @@ def page_sav(a):
 <h2 class="group-title">📈 다른 납입액</h2>
 {nb}
 <p class="note">매월 초 납입하는 단리 정기적금 기준이며 이자소득세 15.4%를 뗀 세후 금액입니다. 우대금리·비과세·복리 상품은 반영하지 않았습니다. 이자는 월 납입액 × 월이율 × n(n+1)/2로 계산합니다.</p>
-{chips([("적금 이자 전체", "/savings/"), ("예금 이자", "/deposit/"), ("적금 계산기", "/calculator/")])}
+{chips([("적금 이자 전체", "/savings/"), ("목표 금액 모으기", "/goal/"), ("예금 이자", "/deposit/"), ("적금 계산기", "/calculator/")])}
 """
     faq = [(f"월 {amt(a)} 적금 이자는?", f"연 4% 12개월 기준 세후 이자 {won(d['net'])}원, 만기 수령액 {won(d['total'])}원입니다."), ("적금 이자가 예금보다 적은 이유는?", "매월 나눠 넣어 평균 예치 기간이 짧기 때문입니다. 12개월 적금의 평균 예치 기간은 약 6.5개월입니다.")]
     write(path, layout(path, f"적금 이자 월 {amt(a)} — 연 4% 12개월 만기 {won(d['total'])}원", f"월 {amt(a)} 정기적금 만기 수령액. 연 4% 12개월 {won(d['total'])}원(세후 이자 {won(d['net'])}원), 금리·기간별 표.", body, faq, [("홈", "/"), ("적금 이자", "/savings/"), (amt(a), path)], coupang=a in (30 * MAN, 50 * MAN)), "0.6")
@@ -216,11 +216,280 @@ def hub_sav():
 <div class="tool-box"><div class="tool-row"><div><label for="s-p">월 납입액(원)</label><input id="s-p" type="number" value="500000" style="width:140px"></div><div><label for="s-r">연 금리(%)</label><input id="s-r" type="number" step="0.1" value="4" style="width:80px"></div><div><label for="s-m">기간(개월)</label><input id="s-m" type="number" value="12" style="width:70px"></div><button class="btn-p" id="s-go">계산</button></div><div class="tool-out" id="s-out">계산 결과가 여기에 표시됩니다.</div></div>
 {ad()}
 {table(['월 납입액', '연 4% 12개월 만기 수령액', '세후 이자'], rows, (1, 2))}
-{chips([("예금 이자", "/deposit/"), ("대출 이자", "/loan/")])}
+{chips([("목표 금액 모으기", "/goal/"), ("예금 이자", "/deposit/"), ("이자 계산", "/interest/"), ("대출 이자", "/loan/")])}
 <script src="/assets/js/loan.js"></script>
 """
     faq = [("월 50만 원 적금 1년이면?", f"연 4% 기준 만기 수령액 약 {won(L.savings(50 * MAN, 4.0, 12)['total'])}원입니다."), ("적금도 이자소득세를 떼나요?", "일반 과세는 15.4%입니다. 비과세종합저축 등은 제외됩니다.")]
     write("/savings/", layout("/savings/", "적금 이자 계산 — 월 납입액별 만기 수령액 (정기적금)", "정기적금 이자 계산기와 월 납입액별 만기 수령액. 연 4% 12개월, 이자소득세 15.4% 반영.", body, faq, [("홈", "/"), ("적금 이자", "/savings/")], coupang=True), "0.9")
+
+# ───────────────────────── 이자 (금액×금리) ─────────────────────────
+def kor(n):
+    """원 → '41만 6,667원', '1,200만원', '1억 2,000만원'"""
+    n = int(round(n)); eok, rest = divmod(n, EOK); mn, w = divmod(rest, MAN); p = []
+    if eok: p.append("%d억" % eok)
+    if mn: p.append("{:,}만".format(mn))
+    if w: p.append("{:,}".format(w))
+    return (" ".join(p) or "0") + "원"
+
+INT_AMTS = [500 * MAN, 1000 * MAN, 2000 * MAN, 3000 * MAN, 4000 * MAN, 5000 * MAN, 6000 * MAN, 7000 * MAN, 8000 * MAN, 9000 * MAN,
+            EOK, 15000 * MAN, 2 * EOK, 25000 * MAN, 3 * EOK, 4 * EOK, 5 * EOK, 7 * EOK, 10 * EOK, 20 * EOK]
+INT_RATES = [x / 2 for x in range(2, 21)]          # 1.0 ~ 10.0 (0.5 단위)
+INT_SHARE_INC = [3000, 5000, 7000, 10000]           # 이자 부담 비교용 연소득(만원)
+INOTE = "대출 이자는 이자만 내는 만기일시 기준이며 원금 상환분은 포함하지 않았습니다. 예금 세후 이자는 단리 정기예금에 이자소득세 15.4%를 적용한 값입니다. 실제 이자는 금융기관의 일수 계산·우대금리·세금 혜택에 따라 달라집니다."
+
+def ipath(a, r=None): return "/interest/%s/" % aslug(a) if r is None else "/interest/%s/%s/" % (aslug(a), rs(r))
+
+def page_int(a, r):
+    path = ipath(a, r)
+    yr = L.rnd(a * r / 100.0); mo = L.rnd(a * r / 1200.0); dy = L.rnd(a * r / 100.0 / 365)
+    net = L.deposit(a, r, 12)["net"]; net_m = L.rnd(net / 12.0)
+    ys = years_for(a); y_mid = ys[-1]; e = L.equal_payment(a, r, y_mid)
+    lead = (f"<p class=\"lead\"><b>{amt(a)}</b>에 연 <b>{rs(r)}%</b> 이자가 붙으면 1년 이자는 <b>{won(yr)}원</b>, 한 달 이자는 <b>{won(mo)}원</b>, 하루 이자는 약 {won(dy)}원입니다. "
+            f"대출이라면 이자만 내는 동안 매월 {won(mo)}원을 내고, 정기예금이라면 이자소득세 15.4%를 떼고 1년에 {won(net)}원(월 약 {won(net_m)}원)을 받습니다. "
+            f"원금까지 나눠 갚는 원리금균등으로 {y_mid}년 동안 갚는다면 월 {won(e['monthly'])}원이 듭니다.</p>")
+    t1 = table(["구분", "1년", "한 달", "하루"], [
+        ["대출 이자 (이자만 낼 때)", kor(yr), kor(mo), kor(dy)],
+        ["예금 이자 (세전)", kor(yr), kor(mo), kor(dy)],
+        ["예금 이자 (세후 15.4%)", kor(net), kor(net_m), kor(L.rnd(net / 365.0))]], (1, 2, 3))
+    t2 = table(["금리", "1년 이자", "한 달 이자", "예금 세후 1년"], [
+        [('<a href="%s">연 %s%%</a>' % (ipath(a, x), rs(x))) if x != r else "<b>연 %s%%</b>" % rs(x), kor(a * x / 100.0), kor(a * x / 1200.0), kor(L.deposit(a, x, 12)["net"])] for x in near(INT_RATES, r)], (1, 2, 3))
+    t3 = table(["금액", "1년 이자", "한 달 이자", "예금 세후 1년"], [
+        [('<a href="%s">%s</a>' % (ipath(x, r), amt(x))) if x != a else "<b>%s</b>" % amt(x), kor(x * r / 100.0), kor(x * r / 1200.0), kor(L.deposit(x, r, 12)["net"])] for x in near(INT_AMTS, a)], (1, 2, 3))
+    t4 = table(["갚는 기간", "월 상환액(원리금균등)", "총 이자"], [["%d년" % y, kor(L.equal_payment(a, r, y)["monthly"]), kor(L.equal_payment(a, r, y)["interest"])] for y in ys], (1, 2))
+    t5 = table(["연소득", "연 이자가 차지하는 비중"], [[amt(i * MAN), pct(yr / (i * MAN) * 100, 1)] for i in INT_SHARE_INC], (1,))
+    chips_ = [(f"{amt(a)} 이자 금리별 표", ipath(a)), ("이자 전체표", "/interest/")]
+    if a in LOAN_AMTS and r in RATES: chips_.insert(1, (f"{amt(a)} 연 {rs(r)}% {y_mid}년 상환", "/loan/%s/%s/%d년/" % (aslug(a), rs(r), y_mid)))
+    if a in DEP_AMTS and r in DEP_RATES: chips_.insert(1, (f"예금 {amt(a)} 연 {rs(r)}% 12개월", dpath(a, r, 12)))
+    chips_ += [("대출 이자 계산기", "/calculator/")]
+    body = f"""
+<div class="page-head"><h1>{amt(a)} {rs(r)}% 이자 — 연 {kor(yr)}, 월 {kor(mo)}</h1><p>대출·예금 이자를 한 번에 · 1년·한 달·하루 이자</p></div>
+{lead}
+<div class="stat-row"><div class="stat"><small>1년 이자</small><b>{kor(yr)}</b></div><div class="stat"><small>한 달 이자</small><b>{kor(mo)}</b></div><div class="stat"><small>예금 세후 1년</small><b>{kor(net)}</b></div></div>
+{ad()}
+<h2 class="group-title">💳 대출과 예금, 이자는 이렇게 달라요</h2>
+{t1}
+<h2 class="group-title">📈 금리가 다르면</h2>
+{t2}
+<h2 class="group-title">💰 금액이 다르면</h2>
+{t3}
+<h2 class="group-title">⏳ 원금까지 갚는다면</h2>
+{t4}
+<h2 class="group-title">📊 내 소득 대비 이자 부담</h2>
+{t5}
+<p class="note">{INOTE}</p>
+{chips(chips_)}
+"""
+    faq = [(f"{amt(a)} {rs(r)}% 이자는 한 달에 얼마인가요?", f"한 달 이자는 {won(mo)}원, 1년 이자는 {won(yr)}원입니다(이자만 낼 때)."),
+           (f"{amt(a)} {rs(r)}% 예금 이자는 세금 떼고 얼마인가요?", f"이자소득세 15.4%를 떼면 1년에 {won(net)}원(월 약 {won(net_m)}원)입니다."),
+           (f"{amt(a)}을(를) {rs(r)}%로 {y_mid}년 갚으면 월 얼마인가요?", f"원리금균등 기준 월 {won(e['monthly'])}원이고 총이자는 {won(e['interest'])}원입니다.")]
+    write(path, layout(path, f"{amt(a)} {rs(r)}% 이자 — 연 {kor(yr)}, 월 {kor(mo)}", f"{amt(a)} {rs(r)}% 이자는 1년 {kor(yr)}, 한 달 {kor(mo)}. 대출 이자와 예금 세후 이자({kor(net)}), {y_mid}년 상환 시 월 상환액까지 한 번에 확인.",
+          body, faq, [("홈", "/"), ("이자 계산", "/interest/"), (amt(a), ipath(a)), ("연 %s%%" % rs(r), path)], coupang=(a in (EOK, 3 * EOK, 5 * EOK) and r in (4.0, 5.0))), "0.7" if r in (3.0, 4.0, 5.0) else "0.5")
+
+def page_int_amt(a):
+    path = ipath(a)
+    rows = [['<a href="%s">연 %s%%</a>' % (ipath(a, x), rs(x)), kor(a * x / 100.0), kor(a * x / 1200.0), kor(L.deposit(a, x, 12)["net"])] for x in INT_RATES]
+    y4, m4 = L.rnd(a * 4 / 100.0), L.rnd(a * 4 / 1200.0)
+    body = f"""
+<div class="page-head"><h1>{amt(a)} 이자 — 금리별 1년·한 달 이자</h1><p>연 1~10% · 대출 이자와 예금 세후 이자</p></div>
+<p class="lead"><b>{amt(a)}</b>의 금리별 이자입니다. 예를 들어 연 4%면 1년 이자 {won(y4)}원, 한 달 이자 {won(m4)}원입니다. 금리를 누르면 상환 기간별 월 상환액과 소득 대비 이자 부담까지 볼 수 있습니다.</p>
+{ad()}
+{table(['금리', '1년 이자', '한 달 이자', '예금 세후 1년'], rows, (1, 2, 3))}
+<p class="note">{INOTE}</p>
+{chips([("이자 전체표", "/interest/"), ("대출 이자 계산", "/loan/"), ("예금 이자", "/deposit/"), ("계산기", "/calculator/")])}
+"""
+    faq = [(f"{amt(a)} 이자는 얼마인가요?", f"연 4% 기준 1년 {won(y4)}원, 한 달 {won(m4)}원입니다. 금리별 값은 위 표를 확인하세요."), ("이자는 어떻게 계산하나요?", "1년 이자 = 금액 × 연 금리, 한 달 이자 = 금액 × 연 금리 ÷ 12입니다.")]
+    write(path, layout(path, f"{amt(a)} 이자 계산 — 금리별 1년·한 달 이자", f"{amt(a)}의 연 1~10% 금리별 1년·한 달 이자표. 연 4%면 1년 {kor(y4)}, 대출 이자와 예금 세후 이자 비교.", body, faq,
+          [("홈", "/"), ("이자 계산", "/interest/"), (amt(a), path)]), "0.8")
+
+def hub_int():
+    cols = [3.0, 4.0, 5.0, 6.0]
+    rows = [['<a href="%s">%s</a>' % (ipath(a), amt(a))] + ['<a href="%s">월 %s</a>' % (ipath(a, x), kor(a * x / 1200.0)) for x in cols] for a in INT_AMTS]
+    body = f"""
+<div class="page-head"><h1>이자 계산 — 금액·금리별 1년·한 달 이자</h1><p>예: 3억 4% 이자, 1억 5% 이자</p></div>
+<p class="lead">금액과 금리만 알면 이자는 간단히 구할 수 있습니다. 1년 이자는 금액 × 연 금리, 한 달 이자는 그 값을 12로 나눈 값입니다. 아래에서 금액을 누르면 금리별 이자표, 칸을 누르면 그 금액·금리의 상세 계산(대출 이자와 예금 세후 이자, 상환 기간별 월 상환액)이 나옵니다.</p>
+{ad()}
+{table(['금액'] + ['연 %s%% 월 이자' % rs(x) for x in cols], rows, tuple(range(1, len(cols) + 1)))}
+<p class="note">{INOTE}</p>
+{chips([("대출 이자 계산", "/loan/"), ("월 상환액으로 대출 한도", "/afford/"), ("예금 이자", "/deposit/"), ("계산기", "/calculator/")])}
+"""
+    faq = [("3억 4% 이자는 얼마인가요?", f"1년 {won(3 * EOK * 4 / 100)}원, 한 달 {won(3 * EOK * 4 / 1200)}원입니다."), ("1억 5% 이자는 한 달에 얼마인가요?", f"한 달 약 {won(L.rnd(EOK * 5 / 1200.0))}원입니다(1년 {won(EOK * 5 / 100)}원).")]
+    write("/interest/", layout("/interest/", "이자 계산 — 금액·금리별 1년·한 달 이자표 (3억 4%, 1억 5%)", "금액과 금리별 이자표. 3억 4% 이자, 1억 5% 이자 등 1년·한 달·하루 이자와 예금 세후 이자를 한눈에 확인.", body, faq, [("홈", "/"), ("이자 계산", "/interest/")], coupang=True), "0.9")
+
+# ───────────────────────── 월 상환액 → 대출 한도 ─────────────────────────
+AFF_PAY = [30, 40, 50, 60, 70, 80, 90, 100, 120, 150, 200, 250, 300, 400, 500]   # 만원
+AFF_YEARS = [5, 10, 20, 30, 40]
+def apath(p, r=None, y=None):
+    s = "/afford/%s/" % aslug(p * MAN)
+    return s if r is None else s + "%s/%d년/" % (rs(r), y)
+def nearest_inc(income_man):
+    b = min(INCOMES, key=lambda x: abs(x - income_man))
+    return b if abs(b - income_man) / income_man <= 0.35 else None
+
+def page_aff(p, r, y):
+    M = p * MAN; P = L.loan_from_payment(M, r, y); e = L.equal_payment(P, r, y)
+    need = M * 12 / 0.40; P_st = L.loan_from_payment(M, r + STRESS, y)
+    lead = (f"<p class=\"lead\">매월 <b>{amt(M)}</b>을 갚을 수 있다면 연 <b>{rs(r)}%</b>, <b>{y}년</b> 원리금균등 기준 최대 약 <b>{amt2(P)}</b>까지 대출받을 수 있습니다. "
+            f"이때 총이자는 약 {amt2(e['interest'])}이고 총 상환액은 약 {amt2(e['total'])}입니다. 이 대출의 연 원리금 {amt2(M * 12)}을 DSR 40%로 보면 연소득이 약 {amt2(need)} 이상이어야 하며, "
+            f"스트레스 금리 {STRESS}%p를 더해 심사받으면 한도가 약 {amt2(P_st)}으로 줄어듭니다.</p>")
+    t1 = table(["금리", "대출 가능 금액", "총 이자"], [[('<a href="%s">연 %s%%</a>' % (apath(p, x, y), rs(x))) if x != r else "<b>연 %s%%</b>" % rs(x),
+              amt2(L.loan_from_payment(M, x, y)), amt2(L.equal_payment(L.loan_from_payment(M, x, y), x, y)["interest"])] for x in near(RATES, r)], (1, 2))
+    t2 = table(["대출 기간", "대출 가능 금액", "총 이자"], [[('<a href="%s">%d년</a>' % (apath(p, r, x), x)) if x != y else "<b>%d년</b>" % x,
+              amt2(L.loan_from_payment(M, r, x)), amt2(L.equal_payment(L.loan_from_payment(M, r, x), r, x)["interest"])] for x in AFF_YEARS], (1, 2))
+    t3 = table(["월 상환액", "대출 가능 금액"], [[('<a href="%s">%s</a>' % (apath(x, r, y), amt(x * MAN))) if x != p else "<b>%s</b>" % amt(x * MAN), amt2(L.loan_from_payment(x * MAN, r, y))] for x in near(AFF_PAY, p)], (1,))
+    chips_ = [(f"월 {amt(M)} 대출 한도 전체표", apath(p)), ("월 상환액별 한도", "/afford/")]
+    inc = nearest_inc(need / MAN)
+    if inc: chips_.append((f"연소득 {amt(inc * MAN)} DSR 한도", "/dsr/%s/" % aslug(inc * MAN)))
+    chips_.append(("대출 이자 계산기", "/calculator/"))
+    body = f"""
+<div class="page-head"><h1>월 {amt(M)} 갚으면 대출 얼마? — 연 {rs(r)}% {y}년 약 {amt2(P)}</h1><p>월 상환액으로 거꾸로 구하는 대출 한도 (원리금균등)</p></div>
+{lead}
+<div class="stat-row"><div class="stat"><small>대출 가능 금액</small><b>{amt2(P)}</b></div><div class="stat"><small>총 이자</small><b>{amt2(e['interest'])}</b></div><div class="stat"><small>필요 연소득(DSR 40%)</small><b>{amt2(need)}</b></div></div>
+{ad()}
+<h2 class="group-title">📈 금리가 다르면</h2>
+{t1}
+<h2 class="group-title">⏳ 기간이 다르면</h2>
+{t2}
+<h2 class="group-title">💰 월 상환액이 다르면</h2>
+{t3}
+<h2 class="group-title">📌 알아두기</h2>
+<ul class="lead" style="margin-left:20px"><li>월 상환액 × 월이율 공식을 거꾸로 푼 값으로, 대출액 = 월 상환액 × (1 − (1+월이율)^−개월수) ÷ 월이율 입니다.</li><li>실제 한도는 소득·기존 대출·담보(LTV)와 DSR 심사로 정해지므로 위 금액보다 낮을 수 있습니다. 금리는 변동될 수 있습니다.</li><li>{LNOTE}</li></ul>
+{chips(chips_)}
+"""
+    faq = [(f"월 {amt(M)} 갚으면 대출은 얼마까지 가능한가요?", f"연 {rs(r)}% {y}년 원리금균등 기준 약 {amt2(P)}입니다."), ("월 상환액으로 대출 한도를 어떻게 계산하나요?", "월 상환액 × (1 − (1+월이율)^−개월수) ÷ 월이율로 계산합니다. 금리가 낮고 기간이 길수록 한도가 커집니다."),
+           (f"월 {amt(M)}이면 연소득이 얼마나 필요한가요?", f"DSR 40% 기준으로 연 원리금 {amt2(M * 12)}을 40%로 나눈 약 {amt2(need)} 이상이 필요합니다(다른 대출 없음).")]
+    write(apath(p, r, y), layout(apath(p, r, y), f"월 {amt(M)} 갚으면 대출 얼마? 연 {rs(r)}% {y}년 약 {amt2(P)}", f"월 상환액 {amt(M)}으로 연 {rs(r)}% {y}년 원리금균등 대출 가능 금액은 약 {amt2(P)}, 총이자 약 {amt2(e['interest'])}. 필요 연소득과 스트레스 금리 한도까지.",
+          body, faq, [("홈", "/"), ("월 상환액별 한도", "/afford/"), (f"월 {amt(M)}", apath(p)), (f"연 {rs(r)}% {y}년", apath(p, r, y))]), "0.5")
+
+def page_aff_amt(p):
+    M = p * MAN
+    rows = [['연 %s%%' % rs(r)] + ['<a href="%s">%s</a>' % (apath(p, r, y), amt2(L.loan_from_payment(M, r, y))) for y in AFF_YEARS] for r in RATES]
+    mid = L.loan_from_payment(M, 4.0, 30)
+    body = f"""
+<div class="page-head"><h1>월 {amt(M)} 갚으면 대출 얼마 — 금리·기간별 한도</h1><p>월 상환액 기준 대출 가능 금액 · 연 3~7% · 5~40년</p></div>
+<p class="lead">매월 <b>{amt(M)}</b>을 갚을 수 있을 때 금리와 기간에 따라 받을 수 있는 대출 금액입니다. 연 4% 30년이면 약 {amt2(mid)}입니다. 칸을 누르면 총이자와 필요 연소득까지 확인할 수 있습니다.</p>
+{ad()}
+{table(['금리'] + ['%d년' % y for y in AFF_YEARS], rows, tuple(range(1, len(AFF_YEARS) + 1)))}
+<p class="note">{LNOTE}</p>
+{chips([("월 상환액별 한도", "/afford/"), ("DSR 한도", "/dsr/"), ("대출 이자 계산", "/loan/"), ("계산기", "/calculator/")])}
+"""
+    faq = [(f"월 {amt(M)} 갚으면 대출은 얼마까지?", f"연 4% 30년 원리금균등 기준 약 {amt2(mid)}입니다."), ("금리가 오르면 한도가 줄어드나요?", "네. 같은 월 상환액이라도 금리가 높을수록 빌릴 수 있는 금액이 줄어듭니다.")]
+    write(apath(p), layout(apath(p), f"월 {amt(M)} 갚으면 대출 얼마 — 금리·기간별 대출 한도", f"월 {amt(M)}을 갚을 수 있을 때 금리 3~7%, 5~40년별 대출 가능 금액. 연 4% 30년 약 {amt2(mid)}.", body, faq,
+          [("홈", "/"), ("월 상환액별 한도", "/afford/"), (f"월 {amt(M)}", apath(p))]), "0.7")
+
+def hub_aff():
+    rows = [['<a href="%s">%s</a>' % (apath(p), amt(p * MAN)), amt2(L.loan_from_payment(p * MAN, 4.0, 30)), amt2(L.loan_from_payment(p * MAN, 5.0, 30)), amt2(L.loan_from_payment(p * MAN, 4.0, 10))] for p in AFF_PAY]
+    body = f"""
+<div class="page-head"><h1>월 상환액으로 대출 한도 계산 — 월 얼마 갚으면 대출 얼마?</h1><p>월 30만~500만 원 · 원리금균등</p></div>
+<p class="lead">매달 갚을 수 있는 금액을 정하면 빌릴 수 있는 대출 금액을 알 수 있습니다. 월 상환액을 누르면 금리·기간별 한도 표가 나오고, 표의 칸을 누르면 총이자와 필요 연소득까지 확인할 수 있습니다. 소득 기준 한도는 <a href="/dsr/">DSR 한도</a>에서 볼 수 있습니다.</p>
+{ad()}
+{table(['월 상환액', '연 4% 30년', '연 5% 30년', '연 4% 10년'], rows, (1, 2, 3))}
+<p class="note">{LNOTE}</p>
+{chips([("DSR 대출 한도", "/dsr/"), ("대출 이자 계산", "/loan/"), ("이자 계산", "/interest/"), ("계산기", "/calculator/")])}
+"""
+    faq = [("월 100만 원 갚으면 대출은 얼마까지 가능한가요?", f"연 4% 30년 원리금균등 기준 약 {amt2(L.loan_from_payment(100 * MAN, 4.0, 30))}입니다."), ("월 상환액으로 대출 한도를 어떻게 구하나요?", "월 상환액 × (1 − (1+월이율)^−개월수) ÷ 월이율로 계산합니다.")]
+    write("/afford/", layout("/afford/", "월 상환액으로 대출 한도 계산 — 월 100만원 갚으면 대출 얼마?", f"월 상환액 30만~500만 원별 대출 가능 금액. 월 100만원이면 연 4% 30년 약 {amt2(L.loan_from_payment(100 * MAN, 4.0, 30))}. 금리·기간별 표.", body, faq, [("홈", "/"), ("월 상환액별 한도", "/afford/")], coupang=True), "0.9")
+
+# ───────────────────────── 적금 목표 금액 ─────────────────────────
+GOAL_T = [500 * MAN, 1000 * MAN, 2000 * MAN, 3000 * MAN, 5000 * MAN, EOK, 2 * EOK, 3 * EOK]
+GOAL_N = [12, 24, 36, 48, 60]
+def gpath(g, r=None, n=None):
+    s = "/goal/%s/" % aslug(g)
+    return s if r is None else s + "%s/%d개월/" % (rs(r), n)
+GOAL_SET = {(g, r, n) for g in GOAL_T for r in SAV_RATES for n in GOAL_N if 50000 <= L.goal_monthly(g, r, n) <= 5_000_000}
+def glink(g, r, n, text):
+    return '<a href="%s">%s</a>' % (gpath(g, r, n), text) if (g, r, n) in GOAL_SET else text
+
+def page_goal(g, r, n):
+    m = L.goal_monthly(g, r, n); s = L.savings(m, r, n); dp = L.deposit_principal_for(g, r, n)
+    yrs = ("%d년" % (n // 12)) if n % 12 == 0 else "%d개월" % n
+    lead = (f"<p class=\"lead\"><b>{amt(g)}</b>을 모으려면 연 <b>{rs(r)}%</b> 정기적금(단리)에 <b>{yrs}</b> 동안 매월 약 <b>{won(m)}원</b>을 넣어야 합니다. "
+            f"원금은 {won(s['principal'])}원이고 세후 이자 {won(s['net'])}원이 붙어 만기에 {won(s['total'])}원을 받습니다. "
+            f"같은 금리로 한 번에 맡기는 정기예금이라면 약 {amt2(dp)}을 {yrs}간 맡기면 같은 금액이 됩니다.</p>")
+    t1 = table(["금리", "월 납입액", "세후 이자", "만기 수령액"], [[glink(g, x, n, "연 %s%%" % rs(x)) if x != r else "<b>연 %s%%</b>" % rs(x), won(L.goal_monthly(g, x, n)) + "원", won(L.savings(L.goal_monthly(g, x, n), x, n)["net"]) + "원", won(L.savings(L.goal_monthly(g, x, n), x, n)["total"]) + "원"] for x in SAV_RATES], (1, 2, 3))
+    t2 = table(["기간", "월 납입액", "세후 이자"], [[glink(g, r, k, ("%d개월" % k)) if k != n else "<b>%d개월</b>" % k, won(L.goal_monthly(g, r, k)) + "원", won(L.savings(L.goal_monthly(g, r, k), r, k)["net"]) + "원"] for k in GOAL_N if (g, r, k) in GOAL_SET or k == n], (1, 2))
+    t3 = table(["목표 금액", "월 납입액"], [[glink(x, r, n, amt(x)) if x != g else "<b>%s</b>" % amt(x), won(L.goal_monthly(x, r, n)) + "원"] for x in near(GOAL_T, g, 2) if (x, r, n) in GOAL_SET or x == g], (1,))
+    near_sav = min(SAV_AMTS, key=lambda x: abs(x - m)); chips_ = [(f"{amt(g)} 모으기 전체표", gpath(g)), ("목표 금액별 적금", "/goal/")]
+    if abs(near_sav - m) / m <= 0.35: chips_.append((f"월 {amt(near_sav)} 적금 이자", "/savings/%s/" % aslug(near_sav)))
+    chips_.append(("적금 계산기", "/calculator/"))
+    body = f"""
+<div class="page-head"><h1>{amt(g)} 모으기 적금 — 연 {rs(r)}% {yrs} 월 {won(m)}원</h1><p>목표 금액에서 거꾸로 구하는 월 적금 납입액 (세후)</p></div>
+{lead}
+<div class="stat-row"><div class="stat"><small>월 납입액</small><b>{won(m)}원</b></div><div class="stat"><small>세후 이자</small><b>{won(s['net'])}원</b></div><div class="stat"><small>만기 수령액</small><b>{won(s['total'])}원</b></div></div>
+{ad()}
+<h2 class="group-title">📈 금리가 다르면</h2>
+{t1}
+<h2 class="group-title">⏳ 기간이 다르면</h2>
+{t2}
+<h2 class="group-title">🎯 목표 금액이 다르면</h2>
+{t3}
+<p class="note">매월 초 납입하는 단리 정기적금에 이자소득세 15.4%를 적용한 세후 만기 수령액이 목표 금액 이상이 되는 최소 월 납입액(100원 단위 올림)입니다. 우대금리·비과세·복리 상품은 반영하지 않았습니다.</p>
+{chips(chips_)}
+"""
+    faq = [(f"{amt(g)} 모으려면 적금을 매달 얼마 넣어야 하나요?", f"연 {rs(r)}% {yrs} 단리 정기적금 기준 월 약 {won(m)}원입니다(세후)."), ("적금과 예금 중 목표 달성에 어느 쪽이 유리한가요?", f"같은 금리라면 한 번에 맡기는 예금이 이자가 더 붙지만 목돈이 필요합니다. 이 조건의 예금은 약 {amt2(dp)}이 필요합니다."),
+           ("금리가 오르면 월 납입액이 얼마나 줄어드나요?", f"연 {rs(SAV_RATES[-1])}%면 월 {won(L.goal_monthly(g, SAV_RATES[-1], n))}원으로 줄어드는 식으로 금리가 높을수록 부담이 줄지만 차이는 크지 않습니다.")]
+    write(gpath(g, r, n), layout(gpath(g, r, n), f"{amt(g)} 모으기 적금 연 {rs(r)}% {yrs} — 월 {won(m)}원", f"{amt(g)}을 모으려면 연 {rs(r)}% 적금 {yrs} 동안 월 약 {won(m)}원. 세후 이자 {won(s['net'])}원, 만기 수령액 {won(s['total'])}원.",
+          body, faq, [("홈", "/"), ("적금 목표", "/goal/"), (amt(g), gpath(g)), (f"연 {rs(r)}% {yrs}", gpath(g, r, n))]), "0.5")
+
+def page_goal_amt(g):
+    rows = [['연 %s%%' % rs(r)] + [glink(g, r, n, won(L.goal_monthly(g, r, n)) + "원") if (g, r, n) in GOAL_SET else "—" for n in GOAL_N] for r in SAV_RATES]
+    ns = [n for n in GOAL_N if (g, 4.0, n) in GOAL_SET]; n0 = ns[0] if ns else GOAL_N[-1]
+    body = f"""
+<div class="page-head"><h1>{amt(g)} 모으기 — 월 적금 납입액 (금리·기간별)</h1><p>정기적금 단리 · 이자소득세 15.4% 반영 세후</p></div>
+<p class="lead"><b>{amt(g)}</b>을 적금으로 모으려면 매월 얼마를 넣어야 하는지 금리와 기간별로 정리했습니다. 연 4% {n0}개월이면 월 약 {won(L.goal_monthly(g, 4.0, n0))}원입니다. 칸을 누르면 세후 이자와 예금으로 모을 때의 필요 원금을 볼 수 있습니다. 월 부담이 너무 큰 조합(월 500만 원 초과)이나 너무 작은 조합(월 5만 원 미만)은 표시하지 않았습니다.</p>
+{ad()}
+{table(['금리'] + ['%d개월' % n for n in GOAL_N], rows, tuple(range(1, len(GOAL_N) + 1)))}
+{chips([("목표 금액별 적금", "/goal/"), ("적금 이자", "/savings/"), ("예금 이자", "/deposit/"), ("계산기", "/calculator/")])}
+"""
+    faq = [(f"{amt(g)} 모으려면 월 얼마씩 저축해야 하나요?", f"연 4% {n0}개월 적금 기준 월 약 {won(L.goal_monthly(g, 4.0, n0))}원입니다."), ("이자를 포함해 계산한 건가요?", "네. 세후 만기 수령액이 목표 금액 이상이 되도록 이자소득세 15.4%를 뗀 이자를 포함해 계산했습니다.")]
+    write(gpath(g), layout(gpath(g), f"{amt(g)} 모으기 적금 — 월 납입액 금리·기간별 표", f"{amt(g)}을 모으기 위한 월 적금 납입액을 금리 3~6%, 12~60개월별로 계산. 연 4% {n0}개월 월 약 {won(L.goal_monthly(g, 4.0, n0))}원.", body, faq,
+          [("홈", "/"), ("적금 목표", "/goal/"), (amt(g), gpath(g))]), "0.7")
+
+def hub_goal():
+    cols = [(24, 4.0), (36, 4.0), (60, 4.0)]
+    rows = [['<a href="%s">%s</a>' % (gpath(g), amt(g))] + [glink(g, r, n, "월 " + won(L.goal_monthly(g, r, n)) + "원") if (g, r, n) in GOAL_SET else "—" for n, r in cols] for g in GOAL_T]
+    body = f"""
+<div class="page-head"><h1>목표 금액 모으기 적금 계산 — 1억 모으려면 월 얼마?</h1><p>목표 금액에서 거꾸로 구하는 월 적금 납입액 (세후)</p></div>
+<p class="lead">모으고 싶은 목표 금액을 정하면 적금에 매달 얼마를 넣어야 하는지 알 수 있습니다. 이자소득세 15.4%를 뗀 세후 만기 수령액이 목표 금액이 되도록 계산했습니다. 목표 금액을 누르면 금리·기간별 표가 나옵니다.</p>
+{ad()}
+{table(['목표 금액', '연 4% 24개월', '연 4% 36개월', '연 4% 60개월'], rows, (1, 2, 3))}
+{chips([("적금 이자", "/savings/"), ("예금 이자", "/deposit/"), ("이자 계산", "/interest/"), ("계산기", "/calculator/")])}
+"""
+    faq = [("1억 모으려면 적금을 월 얼마 넣어야 하나요?", f"연 4% 60개월 단리 적금 기준 월 약 {won(L.goal_monthly(EOK, 4.0, 60))}원입니다(세후)."), ("적금 5년은 이자가 얼마나 붙나요?", "월 납입액 × 월이율 × n(n+1)/2로 계산한 단리 이자에 15.4%를 뗍니다. 기간이 길수록 이자 비중이 커집니다.")]
+    write("/goal/", layout("/goal/", "목표 금액 모으기 적금 계산 — 1억 모으려면 월 얼마?", f"500만~3억 원 목표별 월 적금 납입액. 1억을 연 4% 60개월 적금으로 모으려면 월 약 {won(L.goal_monthly(EOK, 4.0, 60))}원.", body, faq, [("홈", "/"), ("적금 목표", "/goal/")], coupang=True), "0.9")
+
+# ───────────────────────── 예금 금액×금리×기간 ─────────────────────────
+def dpath(a, r, m): return "/deposit/%s/%s/%d개월/" % (aslug(a), rs(r), m)
+
+def page_dep_combo(a, r, m):
+    d = L.deposit(a, r, m); total = a + d["net"]; mo_net = L.rnd(d["net"] / m)
+    x = L.rnd(a / float(m)); s = L.savings(x, r, m); ratio = s["net"] / d["net"] * 100 if d["net"] else 0
+    ann = d["net"] / a * 12.0 / m * 100
+    lead = (f"<p class=\"lead\"><b>{amt(a)}</b>을 연 <b>{rs(r)}%</b> 정기예금에 <b>{m}개월</b> 맡기면 세전 이자 {won(d['gross'])}원에서 이자소득세 {won(d['tax'])}원을 뗀 <b>세후 {won(d['net'])}원</b>을 받고, 만기 수령액은 {won(total)}원입니다. "
+            f"월평균 이자는 약 {won(mo_net)}원이며 세후 연 수익률은 {pct(ann)}입니다. 같은 돈을 매달 {won(x)}원씩 적금으로 나눠 넣으면 세후 이자는 {won(s['net'])}원으로 예금의 {pct(ratio, 0)} 수준입니다.</p>")
+    t1 = table(["금리", "세후 이자", "만기 수령액"], [[('<a href="%s">연 %s%%</a>' % (dpath(a, x, m), rs(x))) if x != r else "<b>연 %s%%</b>" % rs(x), won(L.deposit(a, x, m)["net"]) + "원", won(a + L.deposit(a, x, m)["net"]) + "원"] for x in DEP_RATES], (1, 2))
+    t2 = table(["기간", "세후 이자", "만기 수령액"], [[('<a href="%s">%d개월</a>' % (dpath(a, r, k), k)) if k != m else "<b>%d개월</b>" % k, won(L.deposit(a, r, k)["net"]) + "원", won(a + L.deposit(a, r, k)["net"]) + "원"] for k in DEP_MONTHS], (1, 2))
+    t3 = table(["예치 금액", "세후 이자", "만기 수령액"], [[('<a href="%s">%s</a>' % (dpath(x_, r, m), amt(x_))) if x_ != a else "<b>%s</b>" % amt(x_), won(L.deposit(x_, r, m)["net"]) + "원", won(x_ + L.deposit(x_, r, m)["net"]) + "원"] for x_ in near(DEP_AMTS, a, 2)], (1, 2))
+    chips_ = [(f"예금 {amt(a)} 금리·기간별 표", "/deposit/%s/" % aslug(a)), ("예금 이자 전체", "/deposit/")]
+    if a in INT_AMTS and r in INT_RATES: chips_.append((f"{amt(a)} {rs(r)}% 이자", ipath(a, r)))
+    chips_ += [("적금 이자", "/savings/"), ("예금 계산기", "/calculator/")]
+    body = f"""
+<div class="page-head"><h1>예금 {amt(a)} 연 {rs(r)}% {m}개월 — 세후 이자 {won(d['net'])}원</h1><p>정기예금 세후 이자·만기 수령액 (이자소득세 15.4%)</p></div>
+{lead}
+<div class="stat-row"><div class="stat"><small>세후 이자</small><b>{won(d['net'])}원</b></div><div class="stat"><small>만기 수령액</small><b>{won(total)}원</b></div><div class="stat"><small>월평균 이자</small><b>{won(mo_net)}원</b></div></div>
+{ad()}
+<h2 class="group-title">📈 금리가 다르면</h2>
+{t1}
+<h2 class="group-title">⏳ 기간이 다르면</h2>
+{t2}
+<h2 class="group-title">💰 예치 금액이 다르면</h2>
+{t3}
+<p class="note">{DNOTE}</p>
+{chips(chips_)}
+"""
+    faq = [(f"{amt(a)} 연 {rs(r)}% {m}개월 예금 이자는 얼마인가요?", f"세전 {won(d['gross'])}원, 이자소득세 15.4%를 뗀 세후 {won(d['net'])}원입니다."), ("예금 만기 수령액은 얼마인가요?", f"원금 {won(a)}원에 세후 이자를 더한 {won(total)}원입니다."),
+           ("같은 금액을 적금으로 나눠 넣으면 이자가 얼마나 줄어드나요?", f"매달 {won(x)}원씩 넣으면 세후 이자가 {won(s['net'])}원으로 예금의 약 {pct(ratio, 0)}입니다. 매월 넣은 돈의 예치 기간이 짧기 때문입니다.")]
+    write(dpath(a, r, m), layout(dpath(a, r, m), f"예금 {amt(a)} 연 {rs(r)}% {m}개월 이자 — 세후 {won(d['net'])}원", f"{amt(a)}을 연 {rs(r)}% 정기예금에 {m}개월 맡기면 세후 이자 {won(d['net'])}원, 만기 수령액 {won(total)}원(이자소득세 15.4%).",
+          body, faq, [("홈", "/"), ("예금 이자", "/deposit/"), (amt(a), "/deposit/%s/" % aslug(a)), (f"연 {rs(r)}% {m}개월", dpath(a, r, m))]), "0.5")
 
 # ───────────────────────── 계산기·기타 ─────────────────────────
 def page_calc():
@@ -250,10 +519,13 @@ def page_home():
 <a class="card" href="/dsr/"><b>📏 DSR 한도</b><span>연소득별 대출 가능 금액</span></a>
 <a class="card" href="/deposit/"><b>💰 예금 이자</b><span>금액별 세후 이자</span></a>
 <a class="card" href="/savings/"><b>🐷 적금 이자</b><span>월 납입액별 만기 수령액</span></a>
+<a class="card" href="/interest/"><b>💸 이자 계산</b><span>금액×금리 1년·한 달 이자</span></a>
+<a class="card" href="/afford/"><b>🧾 대출 한도</b><span>월 상환액으로 거꾸로 계산</span></a>
+<a class="card" href="/goal/"><b>🎯 목표 모으기</b><span>1억 모으려면 월 얼마?</span></a>
 <a class="card" href="/calculator/"><b>🧮 계산기</b><span>직접 입력</span></a>
 </div>
 <h2 class="group-title">🔥 많이 찾는 계산</h2>
-{chips([("3억 4% 30년", "/loan/3억/4/30년/"), ("2억 4.5% 20년", "/loan/2억/4.5/20년/"), ("5억 4% 30년", "/loan/5억/4/30년/"), ("1억 5% 10년", "/loan/1억/5/10년/"), ("연소득 5천 한도", "/dsr/5천/"), ("예금 1천만원", "/deposit/1천/"), ("적금 월 50만원", "/savings/50/")])}
+{chips([("3억 4% 이자", "/interest/3억/4/"), ("1억 5% 이자", "/interest/1억/5/"), ("월 100만원 대출한도", "/afford/100/4/30년/"), ("1억 모으기 적금", "/goal/1억/4/60개월/"), ("3억 4% 30년", "/loan/3억/4/30년/"), ("2억 4.5% 20년", "/loan/2억/4.5/20년/"), ("5억 4% 30년", "/loan/5억/4/30년/"), ("1억 5% 10년", "/loan/1억/5/10년/"), ("연소득 5천 한도", "/dsr/5천/"), ("예금 1천만원", "/deposit/1천/"), ("적금 월 50만원", "/savings/50/")])}
 <p class="lead">우아대출은 대출 원리금 상환액과 총이자, DSR 대출 한도, 예금·적금 세후 이자를 금액별로 계산해 둔 사이트입니다. 모든 결과는 입력 조건으로 계산한 참고용 추정이며 대출·투자 권유가 아닙니다. 자세한 기준은 <a href="/about/">계산 기준</a>을 참고하세요. 연봉 실수령액과 세금은 <a href="https://wooayeonbong.wooahouse.com">우아연봉</a>·<a href="https://wooatax.wooahouse.com">우아세금</a>에서 확인하세요.</p>
 """
     faq = [("계산 결과를 믿어도 되나요?", "입력한 조건으로 계산한 참고용 추정입니다. 실제 금리와 한도는 금융기관 심사 결과에 따릅니다."), ("원리금균등이 무엇인가요?", "매월 같은 금액(원금+이자)을 내는 상환 방식입니다.")]
@@ -265,6 +537,7 @@ def page_about():
 <h2 class="group-title">🏦 대출 이자</h2><p class="lead">원리금균등: 월 상환액 = 원금 × 월이율 ÷ (1 − (1+월이율)^−개월수), 월이율 = 연이율 ÷ 12. 원금균등: 매월 원금 = 대출액 ÷ 개월수, 이자 = 잔액 × 월이율, 총이자 = 대출액 × 월이율 × (개월수+1) ÷ 2. 만기일시: 매월 이자 = 대출액 × 월이율. 거치기간, 중도상환수수료, 인지세, 변동금리 변화는 반영하지 않았습니다.</p>
 <h2 class="group-title">📏 DSR</h2><p class="lead">연소득 × 40%(은행권 기준)를 연간 원리금 상환 가능액으로 보고 원리금균등으로 환산한 최대 대출액입니다. 다른 대출이 없다고 가정하며 스트레스 DSR 가산금리는 예시(1.5%p)입니다. 실제 한도는 LTV·DTI·지역별 규제와 금융기관 심사에 따릅니다.</p>
 <h2 class="group-title">💰 예금·적금</h2><p class="lead">단리 정기예금: 원금 × 연이율 × 개월수/12. 정기적금(매월 초 납입 단리): 월 납입액 × 월이율 × n(n+1)/2. 이자소득세 15.4%(소득세 14% + 지방소득세 1.4%)를 뗀 세후 금액이며 우대금리·비과세·복리는 반영하지 않았습니다.</p>
+<h2 class="group-title">💸 이자·한도·목표 계산</h2><p class="lead">이자: 1년 이자 = 금액 × 연 금리, 한 달 이자 = 금액 × 연 금리 ÷ 12(이자만 내는 만기일시 기준). 월 상환액 → 대출 한도: 월 상환액 × (1 − (1+월이율)^−개월수) ÷ 월이율(원리금균등, 만원 단위 내림). 목표 금액 적금: 세후 만기 수령액이 목표 이상이 되는 최소 월 납입액(단리, 이자소득세 15.4%, 100원 단위 올림). 예금 금리·기간 조합은 단리 세후 이자입니다.</p>
 <h2 class="group-title">⚠️ 한계</h2><p class="lead">이 사이트의 계산은 입력 조건에 따른 참고용 추정이며 특정 금융상품의 가입·대출을 권유하지 않습니다. 계약 전 금융기관의 상품설명서와 금융감독원 금융소비자 정보포털에서 확인하세요.</p>
 <h2 class="group-title">📬 문의·정정</h2><p class="lead">오류 제보는 <a href="mailto:ingmaster83@gmail.com">ingmaster83@gmail.com</a> 으로 보내 주세요.</p>
 """
@@ -317,7 +590,24 @@ def main():
     for a in DEP_AMTS: page_dep(a)
     hub_dep()
     for a in SAV_AMTS: page_sav(a)
-    hub_sav(); page_calc(); page_home(); page_about(); page_privacy()
+    hub_sav()
+    for a in INT_AMTS:
+        page_int_amt(a)
+        for r in INT_RATES: page_int(a, r)
+    hub_int()
+    for p in AFF_PAY:
+        page_aff_amt(p)
+        for r in RATES:
+            for y in AFF_YEARS: page_aff(p, r, y)
+    hub_aff()
+    for g in GOAL_T:
+        page_goal_amt(g)
+    for (g, r, n) in sorted(GOAL_SET): page_goal(g, r, n)
+    hub_goal()
+    for a in DEP_AMTS:
+        for r in DEP_RATES:
+            for m in DEP_MONTHS: page_dep_combo(a, r, m)
+    page_calc(); page_home(); page_about(); page_privacy()
     today = time.strftime("%Y-%m-%d")
     urls = "".join("<url><loc>%s%s</loc><lastmod>%s</lastmod><priority>%s</priority></url>" % (BASE, q(p), today, pr) for p, pr in WRITTEN)
     (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">%s</urlset>\n' % urls, encoding="utf-8")

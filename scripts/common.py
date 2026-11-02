@@ -9,7 +9,7 @@ SITE = "우아대출"
 NAVER_TOKEN = "0c295c66f7d091fdf93c05d56da5931de4747aa6"      # 네이버 서치어드바이저 메타태그 값 — 사용자 발급 후 입력
 esc = html.escape
 
-NAV = [("대출 이자", "/loan/"), ("DSR 한도", "/dsr/"), ("예금 이자", "/deposit/"), ("적금 이자", "/savings/"), ("계산기", "/calculator/")]
+NAV = [("대출 이자", "/loan/"), ("이자 계산", "/interest/"), ("대출 한도", "/afford/"), ("DSR 한도", "/dsr/"), ("예금 이자", "/deposit/"), ("적금 이자", "/savings/"), ("목표 모으기", "/goal/"), ("계산기", "/calculator/")]
 
 _JOSA = re.compile(r'(\S)((?:</[a-z]+>)*)(이\(가\)|은\(는\)|을\(를\)|과\(와\))')
 _DIG = {"0": True, "1": True, "2": False, "3": True, "4": False, "5": False, "6": True, "7": True, "8": True, "9": False}

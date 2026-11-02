@@ -54,6 +54,23 @@ def savings(m, rate_pct, months=12):
     gross = rnd(m * (rate_pct / 1200.0) * months * (months + 1) / 2.0); tax = rnd(gross * 0.154)
     return dict(principal=m * months, gross=gross, tax=tax, net=gross - tax, total=m * months + gross - tax)
 
+def loan_from_payment(monthly, rate_pct, years):
+    """월 상환액으로 갚을 수 있는 최대 대출액(원리금균등, 만원 단위 내림). pmt()의 역산"""
+    n = int(years * 12); r = rate_pct / 1200.0
+    if r == 0: return int(monthly * n) // 10000 * 10000
+    return int(math.floor(monthly * (1 - (1 + r) ** -n) / r / 10000.0)) * 10000
+
+def goal_monthly(goal, rate_pct, months):
+    """목표 수령액(세후)을 만들기 위한 월 적금 납입액(100원 단위 올림). savings()의 역산"""
+    r = rate_pct / 1200.0
+    factor = months + r * months * (months + 1) / 2.0 * (1 - 0.154)
+    return int(math.ceil(goal / factor / 100.0)) * 100
+
+def deposit_principal_for(goal, rate_pct, months):
+    """만기에 goal을 만들기 위해 한 번에 맡겨야 하는 예금 원금(만원 단위 올림)"""
+    factor = 1 + rate_pct / 100.0 * months / 12.0 * (1 - 0.154)
+    return int(math.ceil(goal / factor / 10000.0)) * 10000
+
 if __name__ == "__main__":
     import sys; sys.stdout.reconfigure(encoding="utf-8")
     print(equal_payment(300_000_000, 4.0, 30), equal_principal(300_000_000, 4.0, 30), bullet(300_000_000, 4.0, 30))
