@@ -522,6 +522,7 @@ def page_home():
 <a class="card" href="/interest/"><b>💸 이자 계산</b><span>금액×금리 1년·한 달 이자</span></a>
 <a class="card" href="/afford/"><b>🧾 대출 한도</b><span>월 상환액으로 거꾸로 계산</span></a>
 <a class="card" href="/goal/"><b>🎯 목표 모으기</b><span>1억 모으려면 월 얼마?</span></a>
+<a class="card" href="/pension/"><b>🏠 주택연금</b><span>나이·집값별 월 수령액</span></a>
 <a class="card" href="/product/"><b>🏷️ 금융상품 금리</b><span>예금·적금·대출 공시 비교</span></a>
 <a class="card" href="/rank/"><b>🏆 금리 순위</b><span>예금·적금·대출 TOP</span></a>
 <a class="card" href="/calculator/"><b>🧮 계산기</b><span>직접 입력</span></a>
@@ -611,6 +612,8 @@ def main():
             for m in DEP_MONTHS: page_dep_combo(a, r, m)
     import build_products
     build_products.main()
+    import build_pension
+    build_pension.main()
     page_calc(); page_home(); page_about(); page_privacy()
     today = time.strftime("%Y-%m-%d")
     urls = "".join("<url><loc>%s%s</loc><lastmod>%s</lastmod><priority>%s</priority></url>" % (BASE, q(p), today, pr) for p, pr in WRITTEN)
